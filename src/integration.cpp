@@ -87,6 +87,11 @@ void installKickerActionProvider(const fs::path &binaryPath, PatchStats &stats) 
             ++stats.created;
         }
     }
+    fs::permissions(target,
+                    fs::perms::owner_read | fs::perms::owner_write | fs::perms::owner_exec |
+                        fs::perms::group_read | fs::perms::group_exec |
+                        fs::perms::others_read | fs::perms::others_exec,
+                    fs::perm_options::replace);
 }
 
 void removeKickerActionProvider(PatchStats &stats) {

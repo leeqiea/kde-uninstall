@@ -41,6 +41,12 @@ cmake --build build -j2
 
 然后打开 KDE 应用启动器，右键某个应用，菜单中会出现“卸载”。底部任务管理器或图标任务管理器的右键菜单不会显示这个按钮。
 
+如果点击“卸载”时 KDE 提示“您没有此文件的执行权限”，重新运行新版安装命令即可修正 `kde-uninstall.desktop` 的执行权限：
+
+```bash
+./build/kde-uninstall --install
+```
+
 如果菜单没有立即刷新，可以运行：
 
 ```bash
