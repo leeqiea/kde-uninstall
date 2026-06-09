@@ -22,6 +22,7 @@ std::vector<std::string> patchDesktopFile(const std::vector<std::string> &origin
                                           const std::filesystem::path &sourcePath,
                                           const std::filesystem::path &binaryPath,
                                           bool generated);
+std::vector<std::string> kickerActionProviderFile(const std::filesystem::path &binaryPath);
 std::vector<std::string> unpatchDesktopFile(const std::vector<std::string> &original);
 bool sameLines(const std::vector<std::string> &left, const std::vector<std::string> &right);
 bool generatedCopyPointsToMissingSource(const std::vector<std::string> &lines);

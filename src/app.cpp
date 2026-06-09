@@ -27,12 +27,12 @@ void printStats(const PatchStats &stats, const std::string &mode) {
 void printHelp() {
     std::cout << "KDE application launcher uninstall action\n\n"
               << "Usage:\n"
-              << "  kde-uninstall                 Install or refresh uninstall actions\n"
-              << "  kde-uninstall --install       Install or refresh uninstall actions\n"
-              << "  kde-uninstall --restore       Remove actions added by this tool\n"
+              << "  kde-uninstall                 Install or refresh launcher uninstall action\n"
+              << "  kde-uninstall --install       Install or refresh launcher uninstall action\n"
+              << "  kde-uninstall --restore       Remove launcher action added by this tool\n"
               << "  kde-uninstall --uninstall-desktop <file.desktop>\n"
-              << "                                Internal entry used by the right-click menu\n\n"
-              << "The installer writes only to ~/.local/bin and ~/.local/share/applications.\n";
+              << "                                Internal entry used by the launcher menu\n\n"
+              << "The installer writes only to ~/.local/bin and ~/.local/share/plasma/kickeractions.\n";
 }
 
 } // namespace

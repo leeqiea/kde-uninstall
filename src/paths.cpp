@@ -34,6 +34,10 @@ fs::path localApplicationsDir() {
     return dataHome() / "applications";
 }
 
+fs::path kickerActionsDir() {
+    return dataHome() / "plasma" / "kickeractions";
+}
+
 fs::path localBinDir() {
     return homeDir() / ".local" / "bin";
 }

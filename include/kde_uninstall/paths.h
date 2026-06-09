@@ -10,6 +10,7 @@ namespace kde_uninstall {
 std::filesystem::path homeDir();
 std::filesystem::path dataHome();
 std::filesystem::path localApplicationsDir();
+std::filesystem::path kickerActionsDir();
 std::filesystem::path localBinDir();
 std::filesystem::path canonicalIfPossible(const std::filesystem::path &path);
 bool isUnderPath(const std::filesystem::path &path, const std::filesystem::path &root);

@@ -9,7 +9,6 @@
 #include "kde_uninstall/ui.h"
 
 #include <filesystem>
-#include <set>
 #include <string>
 
 namespace fs = std::filesystem;
@@ -17,6 +16,10 @@ namespace fs = std::filesystem;
 namespace kde_uninstall {
 
 void cleanupAfterSuccessfulRemoval(const fs::path &desktopPath) {
+    if (!fs::exists(desktopPath)) {
+        return;
+    }
+
     auto lines = readLines(desktopPath);
     if (desktopBool(lines, kGeneratedKey)) {
         std::error_code ec;
@@ -27,6 +30,77 @@ void cleanupAfterSuccessfulRemoval(const fs::path &desktopPath) {
     auto unpatched = unpatchDesktopFile(lines);
     if (!sameLines(lines, unpatched)) {
         writeLinesAtomic(desktopPath, unpatched);
+    }
+}
+
+fs::path kickerActionProviderPath() {
+    return kickerActionsDir() / kKickerActionProviderFile;
+}
+
+void cleanupLegacyDesktopActions(PatchStats &stats) {
+    fs::path localApps = localApplicationsDir();
+    if (!fs::exists(localApps)) {
+        return;
+    }
+
+    std::error_code ec;
+    for (fs::recursive_directory_iterator it(localApps, fs::directory_options::skip_permission_denied, ec), end;
+         it != end; it.increment(ec)) {
+        if (ec) {
+            ec.clear();
+            continue;
+        }
+        if (!it->is_regular_file(ec) || it->path().extension() != ".desktop") {
+            continue;
+        }
+        try {
+            auto lines = readLines(it->path());
+            if (!desktopBool(lines, kManagedKey)) {
+                continue;
+            }
+            if (desktopBool(lines, kGeneratedKey)) {
+                fs::remove(it->path());
+                ++stats.removedStale;
+                continue;
+            }
+            auto unpatched = unpatchDesktopFile(lines);
+            if (!sameLines(lines, unpatched)) {
+                writeLinesAtomic(it->path(), unpatched);
+                ++stats.patched;
+            }
+        } catch (const std::exception &error) {
+            stats.errors.push_back(error.what());
+        }
+    }
+}
+
+void installKickerActionProvider(const fs::path &binaryPath, PatchStats &stats) {
+    fs::create_directories(kickerActionsDir());
+
+    fs::path target = kickerActionProviderPath();
+    auto provider = kickerActionProviderFile(binaryPath);
+    bool existed = fs::exists(target);
+    if (!existed || !sameLines(readLines(target), provider)) {
+        writeLinesAtomic(target, provider);
+        ++stats.patched;
+        if (!existed) {
+            ++stats.created;
+        }
+    }
+}
+
+void removeKickerActionProvider(PatchStats &stats) {
+    fs::path target = kickerActionProviderPath();
+    if (!fs::exists(target)) {
+        return;
+    }
+
+    std::error_code ec;
+    fs::remove(target, ec);
+    if (ec) {
+        stats.errors.push_back("cannot remove " + target.string() + ": " + ec.message());
+    } else {
+        ++stats.removedStale;
     }
 }
 
@@ -153,34 +227,9 @@ bool patchOneDesktop(const fs::path &root,
 
 PatchStats installIntegration() {
     PatchStats stats;
-    fs::create_directories(localApplicationsDir());
     fs::path binaryPath = installSelf();
-
-    std::set<std::string> processedIds;
-    for (const auto &root : applicationRoots()) {
-        if (!fs::exists(root)) {
-            continue;
-        }
-        std::error_code ec;
-        for (fs::recursive_directory_iterator it(root, fs::directory_options::skip_permission_denied, ec), end;
-             it != end; it.increment(ec)) {
-            if (ec) {
-                ec.clear();
-                continue;
-            }
-            if (!it->is_regular_file(ec) || it->path().extension() != ".desktop") {
-                continue;
-            }
-            std::string id = desktopIdFor(root, it->path());
-            if (processedIds.count(id)) {
-                continue;
-            }
-            bool processed = patchOneDesktop(root, it->path(), binaryPath, stats);
-            if (processed || isUnderPath(it->path(), localApplicationsDir())) {
-                processedIds.insert(id);
-            }
-        }
-    }
+    cleanupLegacyDesktopActions(stats);
+    installKickerActionProvider(binaryPath, stats);
 
     refreshKdeCache();
     return stats;
@@ -188,41 +237,8 @@ PatchStats installIntegration() {
 
 PatchStats restoreIntegration() {
     PatchStats stats;
-    fs::path localApps = localApplicationsDir();
-    if (!fs::exists(localApps)) {
-        return stats;
-    }
-
-    std::error_code ec;
-    for (fs::recursive_directory_iterator it(localApps, fs::directory_options::skip_permission_denied, ec), end;
-         it != end; it.increment(ec)) {
-        if (ec) {
-            ec.clear();
-            continue;
-        }
-        if (!it->is_regular_file(ec) || it->path().extension() != ".desktop") {
-            continue;
-        }
-        try {
-            auto lines = readLines(it->path());
-            if (!desktopBool(lines, kManagedKey)) {
-                continue;
-            }
-            if (desktopBool(lines, kGeneratedKey)) {
-                fs::remove(it->path());
-                ++stats.removedStale;
-                continue;
-            }
-            auto unpatched = unpatchDesktopFile(lines);
-            if (!sameLines(lines, unpatched)) {
-                writeLinesAtomic(it->path(), unpatched);
-                ++stats.patched;
-            }
-        } catch (const std::exception &error) {
-            stats.errors.push_back(error.what());
-        }
-    }
-
+    removeKickerActionProvider(stats);
+    cleanupLegacyDesktopActions(stats);
     refreshKdeCache();
     return stats;
 }

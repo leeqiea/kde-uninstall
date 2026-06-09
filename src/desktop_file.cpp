@@ -341,6 +341,20 @@ std::vector<std::string> patchDesktopFile(const std::vector<std::string> &origin
     return lines;
 }
 
+std::vector<std::string> kickerActionProviderFile(const fs::path &binaryPath) {
+    return {"[Desktop Entry]",
+            "Type=Service",
+            "Name=KDE Uninstall",
+            std::string("Actions=") + kActionId + ";",
+            "",
+            std::string("[") + kActionGroup + "]",
+            "Name=Uninstall",
+            "Name[zh_CN]=卸载",
+            "Name[zh_TW]=解除安裝",
+            "Icon=edit-delete",
+            "Exec=" + quoteDesktopExecArg(binaryPath.string()) + " --uninstall-desktop %f"};
+}
+
 std::vector<std::string> unpatchDesktopFile(const std::vector<std::string> &original) {
     auto lines = removeGroup(original, kActionGroup);
     removeManagedActionFromDesktopEntry(lines);
