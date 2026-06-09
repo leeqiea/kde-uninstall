@@ -1,0 +1,25 @@
+# Build outputs
+/build/
+/cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+build.ninja
+compile_commands.json
+
+# Local IDE files
+/.idea/
+/.vscode/
+
+# Generated binaries
+/main
+/kde-uninstall
+*.o
+*.so
+*.a
+
+# Runtime/local files
+*.log
+*.tmp
+.DS_Store
