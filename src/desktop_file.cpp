@@ -67,8 +67,9 @@ void writeLinesAtomic(const fs::path &path, const std::vector<std::string> &line
 
     fs::rename(temp, path);
     fs::permissions(path,
-                    fs::perms::owner_read | fs::perms::owner_write |
-                        fs::perms::group_read | fs::perms::others_read,
+                    fs::perms::owner_read | fs::perms::owner_write | fs::perms::owner_exec |
+                        fs::perms::group_read | fs::perms::group_exec |
+                        fs::perms::others_read | fs::perms::others_exec,
                     fs::perm_options::replace);
 }
 
