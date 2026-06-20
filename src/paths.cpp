@@ -5,9 +5,12 @@
 
 #include <algorithm>
 #include <array>
+#include <cerrno>
 #include <cstdlib>
+#include <cstring>
 #include <filesystem>
 #include <stdexcept>
+#include <sys/stat.h>
 #include <unistd.h>
 
 namespace fs = std::filesystem;
@@ -126,11 +129,27 @@ fs::path installSelf() {
     if (canonicalIfPossible(*self) != canonicalIfPossible(target)) {
         fs::copy_file(*self, target, fs::copy_options::overwrite_existing);
     }
+
+    std::error_code ec;
     fs::permissions(target,
                     fs::perms::owner_read | fs::perms::owner_write | fs::perms::owner_exec |
                         fs::perms::group_read | fs::perms::group_exec |
                         fs::perms::others_read | fs::perms::others_exec,
-                    fs::perm_options::replace);
+                    fs::perm_options::replace,
+                    ec);
+    if (ec) {
+        if (::chmod(target.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) != 0) {
+            throw std::runtime_error("cannot set executable permission on " + target.string() +
+                                     ": " + ec.message());
+        }
+    }
+
+    if (::access(target.c_str(), X_OK) != 0) {
+        throw std::runtime_error(target.string() +
+                                 " is not executable after installation."
+                                 " The filesystem may be mounted with 'noexec' option.");
+    }
+
     return target;
 }
 
