@@ -18,12 +18,26 @@ struct PatchStats {
     std::vector<std::string> errors;
 };
 
+<<<<<<< HEAD
+=======
+struct RemovalTarget {
+    std::string kind;
+    std::string path;
+    std::string label;
+};
+
+>>>>>>> 74cff8e (Initial commit)
 struct RemovalPlan {
     std::string displayName;
     std::string manager;
     std::string packageName;
     std::vector<std::string> command;
     std::string sourcePath;
+<<<<<<< HEAD
+=======
+    std::vector<RemovalTarget> removalTargets;
+    std::string note;
+>>>>>>> 74cff8e (Initial commit)
 };
 
 } // namespace kde_uninstall

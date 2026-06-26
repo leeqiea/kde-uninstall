@@ -18,8 +18,16 @@ KDE Uninstall 是一个给 KDE Plasma 应用启动器添加“卸载”右键按
 - xbps
 - apk
 - eopkg
+- AppImage（例如 `~/Applications/xxx.AppImage`、`/opt/xxx/xxx.AppImage`）
+- 手动复制到 `/opt/<app-dir>` 的应用（例如 `/opt/clion/bin/clion.sh`、`/opt/idea/bin/idea.sh`）
 
 无法安全识别来源的应用不会被卸载。
+
+对于 AppImage，卸载计划会删除 AppImage 文件、对应的 `.desktop` 启动器，以及能安全确认属于该应用的图标文件。
+
+对于手动复制到 `/opt` 的应用，程序会从 `.desktop` 的 `Exec=` 反推出应用目录，只在满足保守条件时删除 `/opt/<app-dir>`：路径必须位于 `/opt` 下，不能是 `/opt` 本身或 `/opt/bin`、`/opt/share` 等公共目录，目录名需要像应用目录，目录内也需要有应用标识（例如 `bin/`、`product-info.json`、`AppRun` 或同名可执行文件）。危险路径如 `/opt`、`/usr`、`/usr/local`、`/home` 会被拒绝。
+
+这两类手动安装应用不会默认删除 `~/.config/<app>`、`~/.local/share/<app>`、`~/.cache/<app>` 等用户数据目录。
 
 ## 构建
 

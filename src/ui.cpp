@@ -35,6 +35,23 @@ bool confirmRemoval(const RemovalPlan &plan) {
     std::string message = "确定卸载 “" + plan.displayName + "” 吗？\n\n来源: " + plan.manager +
                           "\n目标: " + plan.packageName + "\n将执行: " + commandText;
 
+<<<<<<< HEAD
+=======
+    if (!plan.removalTargets.empty()) {
+        message += "\n\n将删除:";
+        for (const auto &target : plan.removalTargets) {
+            message += "\n- ";
+            if (!target.label.empty()) {
+                message += target.label + ": ";
+            }
+            message += target.path;
+        }
+    }
+    if (!plan.note.empty()) {
+        message += "\n\n" + plan.note;
+    }
+
+>>>>>>> 74cff8e (Initial commit)
     if (commandExists("kdialog")) {
         return runNoCapture({"kdialog", "--title", "卸载应用", "--warningyesno", message}) == 0;
     }

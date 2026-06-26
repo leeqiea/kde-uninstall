@@ -1,6 +1,10 @@
 #include "kde_uninstall/app.h"
 
 #include "kde_uninstall/integration.h"
+<<<<<<< HEAD
+=======
+#include "kde_uninstall/package_manager.h"
+>>>>>>> 74cff8e (Initial commit)
 #include "kde_uninstall/ui.h"
 
 #include <exception>
@@ -31,7 +35,13 @@ void printHelp() {
               << "  kde-uninstall --install       Install or refresh launcher uninstall action\n"
               << "  kde-uninstall --restore       Remove launcher action added by this tool\n"
               << "  kde-uninstall --uninstall-desktop <file.desktop>\n"
+<<<<<<< HEAD
               << "                                Internal entry used by the launcher menu\n\n"
+=======
+              << "                                Internal entry used by the launcher menu\n"
+              << "  kde-uninstall --remove-paths <home> <data-home> <kind> <path>...\n"
+              << "                                Internal guarded removal entry\n\n"
+>>>>>>> 74cff8e (Initial commit)
               << "The installer writes only to ~/.local/bin and ~/.local/share/plasma/kickeractions.\n";
 }
 
@@ -51,6 +61,12 @@ int runApp(int argc, char **argv) {
         if (argc == 3 && std::string(argv[1]) == "--uninstall-desktop") {
             return uninstallDesktop(argv[2]);
         }
+<<<<<<< HEAD
+=======
+        if (argc >= 6 && std::string(argv[1]) == "--remove-paths") {
+            return removePlannedPaths(argc, argv);
+        }
+>>>>>>> 74cff8e (Initial commit)
         if (argc == 2 && (std::string(argv[1]) == "--help" || std::string(argv[1]) == "-h")) {
             printHelp();
             return 0;
